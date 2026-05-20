@@ -1,0 +1,518 @@
+CREATE TABLE country (
+    id          INT           PRIMARY KEY,
+    name        VARCHAR(100) NOT NULL,
+    population  BIGINT        NOT NULL,
+    area_km2    DECIMAL(12,2)
+  );
+
+   CREATE TABLE city (
+    id INT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    country_id INT,
+    population BIGINT NOT NULL,
+    rating SMALLINT,
+    FOREIGN KEY (country_id) REFERENCES country(id)
+);
+
+CREATE TABLE  IF NOT EXISTS city (
+    id INT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    country_id INT,
+    population BIGINT NOT NULL,
+    rating SMALLINT,
+    FOREIGN KEY (country_id) REFERENCES country(id)
+);
+
+
+DROP TABLE city;
+DROP TABLE IF EXISTS city;
+
+
+SELECT * FROM country;
+SELECT * FROM city;
+
+
+
+ALTER TABLE city ADD established_year INT;
+ALTER TABLE city ADD is_capital BIT DEFAULT 0;
+ALTER TABLE city DROP COLUMN established_year;
+ALTER TABLE city RENAME column  rating TO visitor_rating;
+ALTER TABLE city ALTER column population TYPE BIGINT;
+ALTER TABLE city ALTER column name SET NOT NULL;
+
+
+CREATE TABLE employee (
+       id   SERIAL PRIMARY KEY,
+       EMAIL VARCHAR
+       (255) UNIQUE NOT NULL,
+       department VARCHAR(50)  NOT NULL DEAFAULT 'General',
+       salary DECIMAL(10,2) CHECK (salary->0),
+       manager_id INT REFERENCES employee(id) on DELETE SET NULL);
+
+
+CREATE TABLE product (
+  id int,
+  price decimal(10,2),
+  stock int,
+
+  CONSTRAINT pk_product PRIMARY KEY(id),
+  CONSTRAINT chk_price_pos CHECK(price _> 0),
+  CONSTRAINT chk_stock_pos CHECK (stock >=0),
+);
+
+
+
+ALTER TABLE product DROP CONSTRAINT chk_stock_pos;
+
+
+
+INSERT INTO country( id,name, population, area_km2)
+VALUES(1, 'FRANCE',66600000,640680.00);
+
+INSERT INTO country(id,name,population,area_km2)
+VALUES(2,'GERMANY', 80700000, 3570000.00);
+
+
+INSERT INTO city(id,name,country_id,population)
+VALUES(5, 'DUBLIN', 5, 1173000);
+
+
+INSERT INTO country (id,name,population, area_km2)
+VALUES
+--(2,'GERMANY',80700000,357000.00),
+(3,'SPAIN',467000000, 505990.00),
+(4,'POLAND', 3840000000,312696.0);
+
+
+INSERT INTO city (id,name,country_id,population,rating)
+VALUES
+--(1, 'PARIS', 1, 2243000,5),
+--(2, 'BERLIN',2, 3460000,3),
+--(3,'WARSAW', 4, 1790000,4),
+--(4,'MADRID', 3, 3200000,4);
+(5,'DUBLIN', 5, 1173000,NULL);
+
+
+
+INSERT INTO city(name,population)
+SELECT name,population
+FROM city 
+WHERE population > 2000000;
+
+INSERT INTO city (id,name,country_id,population,rating)
+VALUES(1,'paris', 1, 23000000,5)
+ON CONFLICT (id) DO UPDATE SET 
+population = EXCLUDED.population,
+rating = EXCLUDED.rating;
+
+
+INSERT INTO city (
+    id,
+    name,
+    country_id,
+    population,
+    rating
+)
+VALUES (
+    1,
+    'paris',
+    1,
+    23000000,
+    5
+)
+ON CONFLICT (id)
+DO UPDATE SET
+    population = EXCLUDED.population,
+    rating = EXCLUDED.rating;
+
+
+    Update city 
+    set rating =4
+    where name = 'Dublin';
+
+    UPDATE city
+    SET 
+       population =135000000,
+       rating =3,
+    WHERE  id =5;
+
+
+    UPDATE city 
+     SET population = ROUND(population *1.02);
+
+UPDATE city 
+SET rating =5
+WHERE country_id IN (
+    SELECT id
+    FROM country 
+    WHERE population >70000000
+    );
+
+
+DELETE FROM city 
+WHERE ID =5;
+
+DELETE FROM city 
+WHERE rating IS  NULL;
+
+
+
+DELETE FROM city 
+WHERE country_id NOT IN (
+   select id from country 
+   );
+
+   TRUNCATE TABLE CITY;
+
+
+   SELECT * FROM COUNTRY;
+
+
+   SELECT name , population, area_km2,
+   ROUND(CAST(population AS decimal) /area_km2,1) AS density
+   FROM country;
+
+
+
+   SELECT c.name,c.population 
+   FROM country AS c;
+
+
+   SELECT 
+   name AS country_name,
+   population AS  people,
+   area_km2 AS  "Area (km2)"
+    FROM  country;
+
+
+
+    SELECT DISTINCT rating 
+    FROM city
+    ORDER BY rating;
+
+
+    SELECT name ,rating
+    FROM city
+    WHERE rating >3 ;
+
+    SELECT name , rating , country_id
+    FROM city
+    WHERE (rating >3 AND population <2500000
+    ) OR   country_id =5;
+
+
+
+    SELECT name FROM city WHERE name LIKE 'P%';
+    SELECT name FROM city WHERE name LIKE '%lin';
+    SELECT name FROM city WHERE name LIKE '%ar%';
+    SELECT name FROM city WHERE name LIKE '_blin';
+
+
+
+    SELECT name, population 
+    FROM city
+    WHERE population BETWEEN 1000000 AND 2500000;
+
+    SELECT name , country_id
+    FROM city 
+    WHERE country_id IN (1,4);
+
+
+    SELECT  name FROM city WHERE rating IS NULL;
+
+    SELECT name FROM city WHERE rating IS NOT NULL;
+
+    SELECT  name FROM city WHERE rating = NULL;
+
+
+    SELECT name , rating
+    FROM city
+    ORDER BY rating DESC;
+
+    SELECT name , country_id , population 
+    FROM city
+    ORDER BY country_id ASC , population DESC;
+
+
+
+    SELECT name, population 
+    FROM city
+    ORDER BY population DESC 
+    LIMIT 3;
+
+    SELECT name,population
+    FROM city
+    ORDER BY population DESC 
+    LIMIT 2 OFFSET 2 ;
+
+
+
+
+    SELECT 
+    ci.name  AS city_name,
+    co.name  AS country_name
+    FROM city ci
+    INNER JOIN country co
+    ON ci.country_id = co.id;
+
+
+
+       SELECT 
+    ci.name  AS city_name,
+    co.name  AS country_name
+    FROM city ci
+    LEFT JOIN country co
+    ON ci.country_id = co.id;
+
+
+    SELECT ci.name
+    FROM city ci
+    LEFT JOIN country co ON ci.country_id = co.id 
+    WHERE co.id IS NULL;
+
+
+       SELECT 
+    ci.name  AS city_name,
+    co.name  AS country_name
+    FROM city ci
+    RIGHT JOIN country co
+    ON ci.country_id = co.id;
+
+
+
+       SELECT 
+    ci.name  AS city_name,
+    co.name  AS country_name
+    FROM city ci
+    FULL OUTER JOIN country co
+    ON ci.country_id = co.id;
+
+
+    SELECT 
+    ci.name AS city_name,
+    co.name AS country_name
+    FROM city ci
+    CROSS JOIN country co;
+
+    Select 
+    emp.name AS employee ,
+    mgr.name AS manager 
+    FROM employee emp 
+    JOIN employeee mgr  ON emp.manager_id =mgr.id;
+
+    SELECT 
+    COUNT(*) AS total_cities,
+    COUNT(rating) AS cities_with_rating,
+    COUNT(DISTINCT country_id ) AS distinct_countries,
+    SUM(population) AS total_population,
+    AVG(population) AS avg_population,
+    MIN(population) AS  smallest,
+    MAX(population) AS largest,
+    AVG(rating) AS avg_rating
+    FROM city;
+
+
+    SELECT country_id,
+    COUNT(*) AS city_count,
+    AVG(rating) AS avg_rating,
+    SUM(population) AS total_pop
+    FROM city
+    GROUP BY country_id
+    ORDER BY country_id;
+
+
+
+    SELECT country_id,
+      AVG(rating) AS avg_rating,
+      COUNT(*) AS city_count
+      FROM city
+      GROUP BY country_id
+      HAVING AVG(rating) >3.5
+      ORDER BY avg_rating DESC ;
+
+
+      SELECT name, rating 
+      FROM  city
+      WHERE rating = (
+         SELECT  rating FROM city WHERE name = 'Paris'
+         );
+
+
+         SELECT name,country_id
+         FROM city
+         WHERE country_id IN 
+         (
+         SELECT id 
+         FROM country
+         WHERE population > 5000000
+         );
+
+
+
+         SELECT name , country_id, population
+         FROM city outer_c
+         WHERE population > (
+            SELECT AVG(population)
+            FROM city inner_c
+            WHERE inner_c.country_id = outer_c.country_id 
+            );
+
+
+
+      SELECT name 
+      FROM country co 
+      WHERE EXISTS (
+      SELECT 1
+      FROM city ci 
+      WHERE ci.country_id = co.id);
+
+      SELECT country_id FROM country,city;
+
+      SELECT 
+      name,
+      country_id,
+      population,
+      SUM(population) OVER() AS grand_total,
+      SUM(population) OVER(PARTITION BY country_id) AS country_total,
+      SUM(population) OVER (
+        ORDER BY id 
+        ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW 
+        ) AS running_total
+        FROM city;
+
+
+
+SELECT 
+name,
+rating,
+ROW_NUMBER() OVER (ORDER BY rating DESC) AS row_num,
+RANK()  OVER(ORDER BY rating DESC) AS rank,
+DENSE_RANK()  OVER(ORDER BY rating DESC) as dense_rank
+FROM city
+WHERE rating IS NOT NULL;
+
+
+SELECT  
+month,
+sold,
+LAG(sold) OVER(ORDER BY month) AS prev_month,
+LEAD(sold) OVER(ORDER BY month) AS next_month,
+sold - LAG(sold) OVER(ORDER BY month)   AS  change
+FROM monthly_sales
+ORDER BY month;
+
+
+SELECT CAST('2024-07-14' AS DATE);
+SELECT CAST('2024-07-14 14:30:00' AS TIMESTAMP);
+
+SELECT CURRENT_DATE;
+SELECT CURRENT_TIMESTAMP;
+SELECT NOW();
+
+
+
+SELECT 
+EXTRACT(YEAR FROM sale_date) AS yr,
+EXTRACT(MONTH FROM sale_date) AS mo,
+SUM(amount) AS monthly_total
+FROM sales 
+GROUP BY
+ EXTRACT(YEAR FROM sale_date),
+ EXTRACT(MONTH FROM sale_date)
+ ORDER BY yr,mo;
+
+
+
+
+ SELECT CURRENT_DATE + INTERVAL '3 months';
+
+ SELECT 
+ CAST('2024-12-31' AS DATE)
+ CAST('2024-01-01' AS DATE) AS days_between;
+
+
+ SELECT event_name, event_date
+   FROM events 
+   WHERE event_date BETWEEN CURRENT_DATE 
+                AND  CURRENT_DATE + INTERVAL '30 days';
+
+
+ SELECT 
+ name,
+ COALESCE(CAST(rating as TEXT), 'Not rated') AS display_rating,
+ COALESCE(rating,0)  AS numeric_rating
+ FROM city;
+
+
+ SELECT 
+ this_month,
+ last_month,
+ this_month * 100 / NULLIF(last_month,0) AS pct_of_last
+ FROM video_stats;
+
+
+
+ SELECT name,population ,
+ CASE 
+ WHEN population > 30000 THEN 'LARGE'
+ WHEN population > 20000 THEN 'medium'
+ WHEN population > 10000 THEN 'small'
+ ELSE
+ END AS size_category
+ FROM city;
+
+
+
+ SELECT 
+  COUNT(*) AS total,
+  COUNT(CASE WHEN rating >4 THEN 1 END) AS high_rated,
+  COUNT(CASE WHEN rating <4 THEN 1 END) AS low_rated,
+  COUNT(CASE WHEN rating IS NULL THEN 1 END) AS unrated,
+  SUM(CASE WHEN rating > 4 THEN population ELSE 0 END ) AS pop_high_dated
+  FROM city;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
